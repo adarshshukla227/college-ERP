@@ -1,0 +1,1261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#0f172a">
+    <title>College ERP - Unified Academic Portal</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'image/favicon1.ico' %}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Recaptcha -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <style>
+        :root {
+            --bg-canvas: #090d16;
+            --surface-card: rgba(18, 25, 43, 0.85);
+            --surface-card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --admin-primary: #3b82f6;
+            --admin-gradient: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+            --student-primary: #0ea5e9;
+            --student-gradient: linear-gradient(135deg, #0284c7 0%, #14b8a6 100%);
+            --staff-primary: #8b5cf6;
+            --staff-gradient: linear-gradient(135deg, #6d28d9 0%, #a855f7 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-color: var(--bg-canvas);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.4) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 15px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle Background Ambient Elements */
+        .ambient-glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ambient-glow-1 {
+            top: -150px;
+            left: 20%;
+            background: #2563eb;
+        }
+        .ambient-glow-2 {
+            bottom: -150px;
+            right: 15%;
+            background: #0ea5e9;
+        }
+
+        /* Main Container */
+        .portal-wrapper {
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-wrapper.form-active {
+            max-width: 480px;
+        }
+
+        /* Top Branding Header */
+        .portal-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-crest-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 88px;
+            height: 88px;
+            background: #ffffff;
+            border-radius: 50%;
+            padding: 6px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 4px rgba(255, 255, 255, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .logo-crest-wrap:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 14px 35px rgba(59, 130, 246, 0.35), 0 0 0 5px rgba(59, 130, 246, 0.3);
+        }
+
+        .logo-crest-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .portal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .portal-subtitle {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        /* Selection View */
+        #portal-selection-view {
+            animation: fadeIn 0.4s ease;
+        }
+
+        .selection-intro {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .selection-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 14px;
+            border-radius: 9999px;
+            margin-bottom: 10px;
+        }
+
+        .selection-heading {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .selection-subtext {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Portal Cards Grid */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .portal-card {
+            background: var(--surface-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--surface-card-border);
+            border-radius: 20px;
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+
+        /* Card Admin Styling */
+        .portal-card.card-admin:hover {
+            transform: translateY(-6px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.3), 0 0 25px rgba(59, 130, 246, 0.15);
+        }
+        .portal-card.card-admin:hover::before {
+            background: var(--admin-gradient);
+        }
+
+        /* Card Student Styling */
+        .portal-card.card-student:hover {
+            transform: translateY(-6px);
+            border-color: rgba(14, 165, 233, 0.4);
+            box-shadow: 0 20px 40px -15px rgba(14, 165, 233, 0.3), 0 0 25px rgba(14, 165, 233, 0.15);
+        }
+        .portal-card.card-student:hover::before {
+            background: var(--student-gradient);
+        }
+
+        .card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .card-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease;
+        }
+
+        .portal-card:hover .card-icon-box {
+            transform: scale(1.08);
+        }
+
+        .card-icon-admin {
+            background: var(--admin-gradient);
+        }
+
+        .card-icon-student {
+            background: var(--student-gradient);
+        }
+
+        .card-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        .badge-admin-tag {
+            background: rgba(59, 130, 246, 0.16);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+
+        .badge-student-tag {
+            background: rgba(14, 165, 233, 0.16);
+            color: #38bdf8;
+            border: 1px solid rgba(14, 165, 233, 0.25);
+        }
+
+        .card-role-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .card-role-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+
+        .card-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+            flex-grow: 1;
+        }
+
+        .card-features li {
+            font-size: 0.83rem;
+            color: #cbd5e1;
+            margin-bottom: 9px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .card-features li i {
+            font-size: 0.78rem;
+            color: #38bdf8;
+        }
+
+        .card-admin .card-features li i {
+            color: #60a5fa;
+        }
+
+        .card-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 13px 20px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            border: none;
+            transition: all 0.25s ease;
+        }
+
+        .card-btn-admin {
+            background: var(--admin-gradient);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        }
+        .portal-card.card-admin:hover .card-btn-admin {
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.55);
+            filter: brightness(1.1);
+        }
+
+        .card-btn-student {
+            background: var(--student-gradient);
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+        }
+        .portal-card.card-student:hover .card-btn-student {
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.55);
+            filter: brightness(1.1);
+        }
+
+        /* Faculty Strip */
+        .faculty-strip {
+            background: rgba(18, 25, 43, 0.6);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .faculty-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #c084fc;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .faculty-link:hover {
+            color: #e9d5ff;
+            transform: translateX(3px);
+            text-decoration: none;
+        }
+
+        /* Login Form Card */
+        #portal-login-view {
+            display: none;
+            animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .login-glass-card {
+            background: var(--surface-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--surface-card-border);
+            border-radius: 22px;
+            padding: 34px 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 35px rgba(59, 130, 246, 0.12);
+            position: relative;
+        }
+
+        /* Form Top Nav */
+        .form-top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .btn-change-portal {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-change-portal:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateX(-2px);
+        }
+
+        .active-role-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 5px 12px;
+            border-radius: 9999px;
+        }
+
+        .pill-admin {
+            background: rgba(59, 130, 246, 0.18);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+        }
+
+        .pill-student {
+            background: rgba(14, 165, 233, 0.18);
+            color: #38bdf8;
+            border: 1px solid rgba(14, 165, 233, 0.35);
+        }
+
+        .pill-staff {
+            background: rgba(168, 85, 247, 0.18);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.35);
+        }
+
+        .form-header-area {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .form-main-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .form-main-subtext {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        /* Form Inputs */
+        .form-group-custom {
+            margin-bottom: 18px;
+        }
+
+        .form-label-custom {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon-box {
+            position: absolute;
+            left: 14px;
+            color: #64748b;
+            font-size: 0.95rem;
+            pointer-events: none;
+            transition: color 0.2s ease;
+            z-index: 2;
+        }
+
+        .input-field-custom {
+            width: 100%;
+            background: rgba(10, 16, 30, 0.7);
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 11px;
+            color: #ffffff;
+            font-size: 0.93rem;
+            padding: 12px 14px 12px 42px;
+            transition: all 0.25s ease;
+        }
+
+        .input-field-custom::placeholder {
+            color: #475569;
+        }
+
+        .input-field-custom:focus {
+            outline: none;
+            background: rgba(10, 16, 30, 0.95);
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            color: #ffffff;
+        }
+
+        .input-field-custom:focus + .input-icon-box,
+        .input-group-custom:focus-within .input-icon-box {
+            color: #60a5fa;
+        }
+
+        .theme-student .input-field-custom:focus {
+            border-color: var(--student-primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+        }
+        .theme-student .input-group-custom:focus-within .input-icon-box {
+            color: #38bdf8;
+        }
+
+        .theme-staff .input-field-custom:focus {
+            border-color: var(--staff-primary);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+        }
+        .theme-staff .input-group-custom:focus-within .input-icon-box {
+            color: #c084fc;
+        }
+
+        /* Password Toggle */
+        .btn-toggle-pwd {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+            z-index: 2;
+        }
+
+        .btn-toggle-pwd:hover {
+            color: #cbd5e1;
+        }
+
+        /* Remember & Forgot Row */
+        .form-extras-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            font-size: 0.84rem;
+        }
+
+        .form-check-custom {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #94a3b8;
+            user-select: none;
+            margin: 0;
+        }
+
+        .form-check-custom input {
+            cursor: pointer;
+            accent-color: #3b82f6;
+            width: 16px;
+            height: 16px;
+        }
+
+        .forgot-link {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-link:hover {
+            color: #bfdbfe;
+            text-decoration: underline;
+        }
+
+        /* reCAPTCHA centering */
+        .recaptcha-center {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        /* Submit Button */
+        .btn-submit-login {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-submit-login.submit-admin {
+            background: var(--admin-gradient);
+            box-shadow: 0 4px 18px rgba(37, 99, 235, 0.45);
+        }
+        .btn-submit-login.submit-admin:hover {
+            box-shadow: 0 6px 24px rgba(37, 99, 235, 0.65);
+            filter: brightness(1.08);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit-login.submit-student {
+            background: var(--student-gradient);
+            box-shadow: 0 4px 18px rgba(14, 165, 233, 0.45);
+        }
+        .btn-submit-login.submit-student:hover {
+            box-shadow: 0 6px 24px rgba(14, 165, 233, 0.65);
+            filter: brightness(1.08);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit-login.submit-staff {
+            background: var(--staff-gradient);
+            box-shadow: 0 4px 18px rgba(139, 92, 246, 0.45);
+        }
+        .btn-submit-login.submit-staff:hover {
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.65);
+            filter: brightness(1.08);
+            transform: translateY(-2px);
+        }
+
+        /* Quick Switcher */
+        .portal-switch-prompt {
+            text-align: center;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .portal-switch-prompt a {
+            color: #60a5fa;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .portal-switch-prompt a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .portal-footer {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Alert Styling */
+        .alert-custom-error {
+            background: rgba(220, 38, 38, 0.16);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .portal-title {
+                font-size: 1.7rem;
+            }
+
+            .selection-heading {
+                font-size: 1.35rem;
+            }
+
+            .portal-card {
+                padding: 26px 22px;
+            }
+
+            .login-glass-card {
+                padding: 26px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .g-recaptcha {
+                transform: scale(0.85);
+                -webkit-transform: scale(0.85);
+                transform-origin: 0 0;
+                -webkit-transform-origin: 0 0;
+            }
+            .recaptcha-center {
+                overflow: hidden;
+                width: 260px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Ambient Background Glow Circles -->
+    <div class="ambient-glow ambient-glow-1"></div>
+    <div class="ambient-glow ambient-glow-2"></div>
+
+    <div class="portal-wrapper {% if role %}form-active{% endif %}" id="portalWrapper">
+
+        <!-- Main Branding Header -->
+        <header class="portal-header">
+            <div class="logo-crest-wrap">
+                <img src="{% static 'dist/img/virus.png' %}" alt="SIGCE College Emblem" class="logo-crest-img">
+            </div>
+            <h1 class="portal-title">College ERP</h1>
+            <p class="portal-subtitle">Integrated Academic & Campus Management System</p>
+        </header>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: PORTAL SELECTION (ADMIN OR STUDENT)-->
+        <!-- ========================================== -->
+        <section id="portal-selection-view" {% if role %}style="display: none;"{% endif %}>
+            <div class="selection-intro">
+                <span class="selection-pill">
+                    <i class="fas fa-university"></i> Portal Gateway
+                </span>
+                <h2 class="selection-heading">Select Your Portal</h2>
+                <p class="selection-subtext">Choose whether you are logging in as an Administrator or a Student</p>
+            </div>
+
+            <!-- Global messages if any -->
+            {% if messages and not role %}
+                {% for message in messages %}
+                <div class="alert-custom-error text-center">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="portal-grid">
+                <!-- Admin Card -->
+                <div class="portal-card card-admin" id="cardAdmin" onclick="selectPortal('admin')">
+                    <div class="card-top-row">
+                        <div class="card-icon-box card-icon-admin">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <span class="card-badge badge-admin-tag">
+                            <i class="fas fa-lock"></i> Administration
+                        </span>
+                    </div>
+
+                    <h3 class="card-role-title">Admin Portal</h3>
+                    <p class="card-role-desc">
+                        For Head of Department & College Management to oversee academic operations, staff records & system controls.
+                    </p>
+
+                    <ul class="card-features">
+                        <li><i class="fas fa-check-circle"></i> Complete Administrative Dashboard</li>
+                        <li><i class="fas fa-check-circle"></i> Manage Faculty, Staff & Students</li>
+                        <li><i class="fas fa-check-circle"></i> Sessions, Courses & Notice Broadcasts</li>
+                    </ul>
+
+                    <button type="button" class="card-btn card-btn-admin">
+                        <span>Login as Administrator</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Student Card -->
+                <div class="portal-card card-student" id="cardStudent" onclick="selectPortal('student')">
+                    <div class="card-top-row">
+                        <div class="card-icon-box card-icon-student">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <span class="card-badge badge-student-tag">
+                            <i class="fas fa-graduation-cap"></i> Academics
+                        </span>
+                    </div>
+
+                    <h3 class="card-role-title">Student Portal</h3>
+                    <p class="card-role-desc">
+                        For enrolled students to access attendance reports, semester examination results & digital library.
+                    </p>
+
+                    <ul class="card-features">
+                        <li><i class="fas fa-check-circle"></i> Live Attendance & Subject Metrics</li>
+                        <li><i class="fas fa-check-circle"></i> Semester Examination Results</li>
+                        <li><i class="fas fa-check-circle"></i> Leave Applications & Digital Library</li>
+                    </ul>
+
+                    <button type="button" class="card-btn card-btn-student">
+                        <span>Login as Student</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Secondary Staff Strip -->
+            <div class="faculty-strip">
+                <div>
+                    <i class="fas fa-chalkboard-teacher me-2 text-purple-400"></i>
+                    <span>Are you a faculty or teaching staff member?</span>
+                </div>
+                <a href="javascript:void(0)" onclick="selectPortal('staff')" class="faculty-link">
+                    <span>Faculty Portal Login</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: DEDICATED LOGIN FORM CARD          -->
+        <!-- ========================================== -->
+        <section id="portal-login-view" {% if role %}style="display: block;"{% endif %}>
+            <div class="login-glass-card" id="loginCard">
+                
+                <!-- Card Top Navigation Bar -->
+                <div class="form-top-nav">
+                    <button type="button" class="btn-change-portal" onclick="selectPortal('selection')">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Change Portal</span>
+                    </button>
+
+                    <span class="active-role-pill pill-admin" id="activeRolePill">
+                        <i class="fas fa-user-shield" id="activeRoleIcon"></i>
+                        <span id="activeRoleText">Administrator</span>
+                    </span>
+                </div>
+
+                <!-- Form Header -->
+                <div class="form-header-area">
+                    <h2 class="form-main-title" id="formMainTitle">Admin Sign In</h2>
+                    <p class="form-main-subtext" id="formMainSubtext">
+                        Enter your administrative credentials to continue
+                    </p>
+                </div>
+
+                <!-- Django Messages / Error Alerts -->
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert-custom-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Demo Credentials Quick Hint -->
+                <div class="demo-hint-box" id="demoHintBox" style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 11px 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: #cbd5e1;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-key text-blue-400" style="color: #60a5fa;"></i>
+                        <span>Default login: <strong id="demoEmail" style="color: #93c5fd;">admin@college.com</strong> / Pass: <strong id="demoPassword" style="color: #93c5fd;">12345</strong></span>
+                    </div>
+                    <button type="button" class="btn-demo-fill" onclick="autoFillCredentials()" style="background: rgba(59, 130, 246, 0.25); border: 1px solid rgba(59, 130, 246, 0.45); color: #ffffff; font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer;">
+                        Fill Credentials
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form action="{% url 'user_login' %}" method="post" id="loginForm">
+                    {% csrf_token %}
+
+                    <!-- Hidden role identifiers -->
+                    <input type="hidden" name="user_type" id="hidden_user_type" value="1">
+                    <input type="hidden" name="portal" id="hidden_portal" value="admin">
+
+                    <!-- Email Field -->
+                    <div class="form-group-custom">
+                        <label for="email" class="form-label-custom">
+                            <i class="fas fa-envelope"></i>
+                            <span id="emailLabelText">Email Address</span>
+                        </label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-envelope input-icon-box"></i>
+                            <input type="email" id="email" name="email" class="input-field-custom"
+                                placeholder="admin@college.com" required autocomplete="username">
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group-custom">
+                        <label for="password" class="form-label-custom">
+                            <i class="fas fa-lock"></i>
+                            <span>Password</span>
+                        </label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-lock input-icon-box"></i>
+                            <input type="password" id="password" name="password" class="input-field-custom"
+                                placeholder="Enter your password" required autocomplete="current-password">
+                            <button type="button" class="btn-toggle-pwd" id="togglePasswordBtn" title="Show/Hide Password">
+                                <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- reCAPTCHA widget -->
+                    <div class="recaptcha-center">
+                        <div class="g-recaptcha" data-sitekey="6LfTGD4qAAAAAJLKy1TGJY7uuTh_T1cB5VikRWjF"></div>
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="form-extras-row">
+                        <label class="form-check-custom" for="remember">
+                            <input type="checkbox" id="remember" name="remember" value="1">
+                            <span>Remember me</span>
+                        </label>
+
+                        <a href="{% url 'password_reset' %}" class="forgot-link">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-submit-login submit-admin" id="btnSubmitLogin">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span id="btnSubmitText">Sign In as Admin</span>
+                    </button>
+
+                    <!-- Bottom Quick Switch Link -->
+                    <div class="portal-switch-prompt" id="portalSwitchPrompt">
+                        <span id="switchPromptText">Looking for student login?</span>
+                        <a href="javascript:void(0)" id="switchPromptLink" onclick="switchAlternateRole()">
+                            Switch to Student Portal &rarr;
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="portal-footer">
+            <p>&copy; 2024 College ERP System. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Portal URL endpoints
+        const URLS = {
+            selection: "{% url 'login_page' %}",
+            admin: "{% url 'admin_login' %}",
+            student: "{% url 'student_login' %}",
+            staff: "{% url 'staff_login' %}"
+        };
+
+        // Current active state
+        let currentRole = "{{ role|default:'' }}";
+
+        // Role configurations
+        const ROLE_CONFIGS = {
+            admin: {
+                userType: '1',
+                portal: 'admin',
+                pillClass: 'pill-admin',
+                pillIcon: 'fas fa-user-shield',
+                pillText: 'Administrator',
+                title: 'Admin Sign In',
+                subtext: 'Enter your administrative credentials to access HOD dashboard',
+                emailPlaceholder: 'admin@college.com',
+                btnClass: 'submit-admin',
+                btnText: 'Sign In as Admin',
+                themeClass: 'theme-admin',
+                switchText: 'Looking for student login?',
+                switchLinkText: 'Switch to Student Portal →',
+                switchTarget: 'student'
+            },
+            student: {
+                userType: '3',
+                portal: 'student',
+                pillClass: 'pill-student',
+                pillIcon: 'fas fa-user-graduate',
+                pillText: 'Student Portal',
+                title: 'Student Sign In',
+                subtext: 'Enter your student registered email to access academic records',
+                emailPlaceholder: 'student@college.com',
+                btnClass: 'submit-student',
+                btnText: 'Sign In as Student',
+                themeClass: 'theme-student',
+                switchText: 'Looking for admin login?',
+                switchLinkText: 'Switch to Admin Portal →',
+                switchTarget: 'admin'
+            },
+            staff: {
+                userType: '2',
+                portal: 'staff',
+                pillClass: 'pill-staff',
+                pillIcon: 'fas fa-chalkboard-teacher',
+                pillText: 'Faculty Portal',
+                title: 'Faculty Sign In',
+                subtext: 'Enter your faculty email to manage attendance & marks',
+                emailPlaceholder: 'staff@college.com',
+                btnClass: 'submit-staff',
+                btnText: 'Sign In as Faculty',
+                themeClass: 'theme-staff',
+                switchText: 'Looking for student login?',
+                switchLinkText: 'Switch to Student Portal →',
+                switchTarget: 'student'
+            }
+        };
+
+        function selectPortal(role, updateHistory = true) {
+            const wrapper = document.getElementById('portalWrapper');
+            const selectionView = document.getElementById('portal-selection-view');
+            const loginView = document.getElementById('portal-login-view');
+            const loginCard = document.getElementById('loginCard');
+
+            if (role === 'selection' || !role) {
+                currentRole = '';
+                wrapper.classList.remove('form-active');
+                loginView.style.display = 'none';
+                selectionView.style.display = 'block';
+
+                if (updateHistory) {
+                    history.pushState({ role: '' }, '', URLS.selection);
+                }
+                return;
+            }
+
+            const cfg = ROLE_CONFIGS[role];
+            if (!cfg) return;
+
+            currentRole = role;
+
+            // Update DOM fields
+            document.getElementById('hidden_user_type').value = cfg.userType;
+            document.getElementById('hidden_portal').value = cfg.portal;
+
+            // Update Pill
+            const pill = document.getElementById('activeRolePill');
+            pill.className = `active-role-pill ${cfg.pillClass}`;
+            document.getElementById('activeRoleIcon').className = cfg.pillIcon;
+            document.getElementById('activeRoleText').textContent = cfg.pillText;
+
+            // Update Titles
+            document.getElementById('formMainTitle').textContent = cfg.title;
+            document.getElementById('formMainSubtext').textContent = cfg.subtext;
+
+            // Update Email Input
+            const emailInput = document.getElementById('email');
+            emailInput.placeholder = cfg.emailPlaceholder;
+
+            // Update Button
+            const submitBtn = document.getElementById('btnSubmitLogin');
+            submitBtn.className = `btn-submit-login ${cfg.btnClass}`;
+            document.getElementById('btnSubmitText').textContent = cfg.btnText;
+
+            // Update Theme on Card
+            loginCard.className = `login-glass-card ${cfg.themeClass}`;
+
+            // Update Switch Prompt
+            document.getElementById('switchPromptText').textContent = cfg.switchText;
+            const switchLink = document.getElementById('switchPromptLink');
+            switchLink.textContent = cfg.switchLinkText;
+            switchLink.onclick = () => selectPortal(cfg.switchTarget);
+
+            // Switch views
+            selectionView.style.display = 'none';
+            loginView.style.display = 'block';
+            wrapper.classList.add('form-active');
+
+            if (updateHistory) {
+                history.pushState({ role: role }, '', URLS[role]);
+            }
+
+            // Update Demo Hint Text
+            const demoEmailEl = document.getElementById('demoEmail');
+            const demoPassEl = document.getElementById('demoPassword');
+            if (role === 'admin') {
+                if (demoEmailEl) demoEmailEl.textContent = 'admin@college.com';
+                if (demoPassEl) demoPassEl.textContent = '12345';
+            } else if (role === 'student') {
+                if (demoEmailEl) demoEmailEl.textContent = 'student@college.com';
+                if (demoPassEl) demoPassEl.textContent = '12345';
+            }
+
+            // Focus email input smoothly
+            setTimeout(() => {
+                emailInput.focus();
+            }, 100);
+        }
+
+        function autoFillCredentials() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            if (currentRole === 'admin') {
+                emailInput.value = 'admin@college.com';
+                passwordInput.value = '12345';
+            } else if (currentRole === 'student') {
+                emailInput.value = 'student@college.com';
+                passwordInput.value = '12345';
+            }
+        }
+
+        function switchAlternateRole() {
+            if (currentRole === 'admin') {
+                selectPortal('student');
+            } else {
+                selectPortal('admin');
+            }
+        }
+
+        // Handle Browser Back / Forward buttons
+        window.addEventListener('popstate', function (event) {
+            const path = window.location.pathname;
+            if (path.includes('/login/admin/')) {
+                selectPortal('admin', false);
+            } else if (path.includes('/login/student/')) {
+                selectPortal('student', false);
+            } else if (path.includes('/login/staff/')) {
+                selectPortal('staff', false);
+            } else {
+                selectPortal('selection', false);
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check initial server role or URL
+            const initialRole = "{{ role }}";
+            if (initialRole && ROLE_CONFIGS[initialRole]) {
+                selectPortal(initialRole, false);
+            } else {
+                // If query param exists ?role=admin
+                const urlParams = new URLSearchParams(window.location.search);
+                const queryRole = urlParams.get('role');
+                if (queryRole && ROLE_CONFIGS[queryRole]) {
+                    selectPortal(queryRole, false);
+                } else if (window.location.pathname.includes('/login/admin/')) {
+                    selectPortal('admin', false);
+                } else if (window.location.pathname.includes('/login/student/')) {
+                    selectPortal('student', false);
+                } else if (window.location.pathname.includes('/login/staff/')) {
+                    selectPortal('staff', false);
+                }
+            }
+
+            // Password Toggle Visibility
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            const pwdInput = document.getElementById('password');
+            const pwdIcon = document.getElementById('togglePasswordIcon');
+
+            if (toggleBtn && pwdInput) {
+                toggleBtn.addEventListener('click', function () {
+                    const isPassword = pwdInput.type === 'password';
+                    pwdInput.type = isPassword ? 'text' : 'password';
+                    pwdIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+                });
+            }
+
+            // Remember Me LocalStorage
+            const rememberCheckbox = document.getElementById('remember');
+            const savedEmail = localStorage.getItem('erp_remembered_email');
+            if (savedEmail) {
+                document.getElementById('email').value = savedEmail;
+                rememberCheckbox.checked = true;
+            }
+
+            document.getElementById('loginForm').addEventListener('submit', function () {
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem('erp_remembered_email', document.getElementById('email').value);
+                } else {
+                    localStorage.removeItem('erp_remembered_email');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
