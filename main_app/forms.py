@@ -205,3 +205,4 @@ class IssueBookForm(forms.Form):
     
     isbn2.widget.attrs.update({'class': 'form-control'})
     name2.widget.attrs.update({'class':'form-control'})
+
